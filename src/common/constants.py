@@ -1,0 +1,7 @@
+EMPTY = 0
+YELLOW = 1
+RED = 2
+
+DX = 6
+DY = 6
+NUMBER_TO_WIN = 4
