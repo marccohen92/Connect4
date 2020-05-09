@@ -1,7 +1,7 @@
 from src.game.board import Board
 from src.common.constants import RED, YELLOW
 
-def fight(p1, p2, verbose=True, nb_playouts=1000):
+def fight(p1, p2, nb_playouts=1000, verbose=True):
     board = Board()
     while(not board.finished):
         if verbose:

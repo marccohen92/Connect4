@@ -1,7 +1,7 @@
 EMPTY = 0
-YELLOW = 1
-RED = 2
+RED = 1
+YELLOW = 2
 
 DX = 6
-DY = 6
+DY = 7
 NUMBER_TO_WIN = 4

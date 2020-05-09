@@ -3,6 +3,7 @@ import copy
 import numpy as np
 from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN
 from src.game.move import Move
+from src.intelligences.ucb import ucb
 class Board():
     def __init__(self):
         self.board = np.full((DX, DY), EMPTY)
@@ -10,6 +11,7 @@ class Board():
         self.turn = RED
         self.finished = False
         self.winner = 0
+        Board.ucb = ucb
         
         
     def legal_moves(self):
