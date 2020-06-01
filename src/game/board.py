@@ -49,6 +49,12 @@ class Board():
         self._check_finished(row, column, color)
          
     
+    def random_move(self, n=None):
+        possible_moves = self.legal_moves()
+        move = random.choice(possible_moves)
+        return move
+    
+    
     def manual_move(self, n=None):
         moves = self.legal_moves()
         legal=False
