@@ -1,10 +1,11 @@
 import random
 import copy
 import numpy as np
-from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN
+from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE
 from src.game.move import Move
 from src.intelligences.ucb import ucb
 from src.intelligences.flat_mc import flat_mc
+from src.intelligences.uct import _uct, uct_search
 
 class Board():
     def __init__(self):
@@ -13,8 +14,12 @@ class Board():
         self.turn = RED
         self.finished = False
         self.winner = 0
+        self.hash = 0
+        self.transposition_table = {}
         Board.ucb = ucb
         Board.flat_mc = flat_mc
+        Board._uct = _uct
+        Board.uct_search = uct_search
         
         
     def legal_moves(self):
@@ -47,6 +52,7 @@ class Board():
         self.tokens_level[column] = row-1
         self._change_turn()
         self._check_finished(row, column, color)
+        self._update_hash(color, column, row)
          
     
     def random_move(self, n=None):
@@ -113,7 +119,7 @@ class Board():
             elif connected < NUMBER_TO_WIN:
                 connected = 0
         return connected >= NUMBER_TO_WIN
-   
+    
        
     def _check_diagonal(self, row, column, color, ascending=True):
         if ascending:                     
@@ -129,3 +135,16 @@ class Board():
             elif connected < NUMBER_TO_WIN:
                 connected = 0
         return connected >= NUMBER_TO_WIN
+    
+    
+    def _update_hash(self, color, column, row):
+        self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column])
+        
+   
+    def _update_transposition_table(self, h, nb_playouts, trys, wins):
+        if h in self.transposition_table:
+            self.transposition_table[h]["total_playouts"] += nb_playouts
+            for key, value in zip(["trys_per_move", "wins_per_move"], [trys, wins]):
+                self.transposition_table[h][key] = [i+j for i,j in zip(self.transposition_table[h][key], value)]
+        else:        
+            self.transposition_table[h] = {"total_playouts": nb_playouts, "trys_per_move": trys, "wins_per_move": wins}
