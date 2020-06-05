@@ -3,7 +3,7 @@ import copy
 import numpy as np
 from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE
 from src.game.move import Move
-from src.intelligences.ucb import ucb
+from src.intelligences.ucb import ucb, ucb_bis
 from src.intelligences.flat_mc import flat_mc
 from src.intelligences.uct import _uct, uct_search
 
@@ -17,6 +17,7 @@ class Board():
         self.hash = 0
         self.transposition_table = {}
         Board.ucb = ucb
+        Board.ucb_bis = ucb_bis
         Board.flat_mc = flat_mc
         Board._uct = _uct
         Board.uct_search = uct_search
