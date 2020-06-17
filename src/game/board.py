@@ -7,6 +7,8 @@ from src.intelligences.ucb import ucb, ucb_bis
 from src.intelligences.flat_mc import flat_mc
 from src.intelligences.uct import _uct, uct_search
 from src.intelligences.rave import _RAVE, rave_search
+from src.intelligences.grave import _GRAVE, grave_search
+
 
 class Board():
     def __init__(self):
@@ -24,6 +26,8 @@ class Board():
         Board.uct_search = uct_search
         Board._RAVE = _RAVE
         Board.rave_search = rave_search
+        Board._GRAVE = _GRAVE
+        Board.grave_search = grave_search
         
         
     def legal_moves(self):

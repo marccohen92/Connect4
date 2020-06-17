@@ -10,7 +10,7 @@ def _update_transposition_table_amaf(transpositionTable, h, nb_playouts, trys, w
             ["trys_per_move", "wins_per_move", "trys_inPlayout_per_move", "wins_inPlayout_per_move"], 
             [trys, wins, trys_inPlayout, wins_inPlayout]
         ):
-            transpositionTable[h][key] = transpositionTable[h][key] + value
+            transpositionTable[h][key] = [i+j for i,j in zip(transpositionTable[h][key], value)]
     else:        
         transpositionTable[h] = {
             "total_playouts": nb_playouts, 
@@ -20,7 +20,7 @@ def _update_transposition_table_amaf(transpositionTable, h, nb_playouts, trys, w
             "wins_inPlayout_per_move": wins_inPlayout
         }
             
-def _RAVE(board, played, transpositionTable):    
+def _GRAVE(board, played, tref, transpositionTable):    
     # On se place du pt de vue de RED pour les stats (winner)
     
     #print("State: " + str(board.hashState)) 
@@ -31,17 +31,17 @@ def _RAVE(board, played, transpositionTable):
         r = board.winner
         if r != RED:
             r = 0
-        """
-        if board.turn == RED:
-            r = 0
-        else:
-            r = 1
-        """
         return r
     
     # SI NOEUD CONNU
     t = transpositionTable.get(board.hash)
     if t != None:
+        
+        # Si le noeud a été joué > 50 fois : cas RAVE classique.
+        # Sinon t est égal à tref (i.e. le dernier noeud joué > 50 fois)
+        tr = tref
+        if t["total_playouts"] > 50:
+            tr = t
         
         # Initialisation pour comparaison
         bestValue = -1000000.0
@@ -85,7 +85,7 @@ def _RAVE(board, played, transpositionTable):
         #print("Simulated board state: " + str(b_simulation.hashState))
         #print("- Recursive call -")
         
-        res = _RAVE(b_simulation, played, transpositionTable) # Appel récursif pour suivre RAVE jusqu'à un noeud terminal / une nouvelle feuille
+        res = _GRAVE(b_simulation, played, tr, transpositionTable) # Appel récursif pour suivre GRAVE jusqu'à un noeud terminal / une nouvelle feuille
         #if board.turn == res:
          #   r = 1
         #else:
@@ -139,12 +139,13 @@ def _RAVE(board, played, transpositionTable):
         
         return result
     
-def rave_search(self, nb_iterations, transpositionTable):
+def grave_search(self, nb_iterations, transpositionTable):
     
     # On effectue les simulations avec RAVE
     for i in range(nb_iterations):
+        t = transpositionTable.get(self.hash)
         b = copy.deepcopy(self)
-        res = _RAVE(b, [], transpositionTable) # On passe une liste vide au départ pour indiquer qu'il n'y a pas d'historique de playout
+        res = _GRAVE(b, [], t, transpositionTable) # On passe une liste vide au départ pour indiquer qu'il n'y a pas d'historique de playout
     #print(transpositionTable)
     t = transpositionTable.get(self.hash)
     moves = self.legal_moves()

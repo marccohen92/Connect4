@@ -3,7 +3,8 @@ import math
 from src.common.constants import MAX_LEGAL_MOVES
 
 def uct_search(self, n=1000):
-    self.transposition_table = {}
+    #self.transposition_table = {} 
+    # Commentée pour conserver la même transposition_table au cours d'un fight
     for i in range(n) :
         copyBoard = copy.deepcopy(self)
         self._uct(copyBoard)

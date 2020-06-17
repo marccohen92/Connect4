@@ -1,4 +1,4 @@
-from src.game.fight import fight, fight_bis
+from src.game.fight import fight, fight_bis, fight_bis_bis
 from src.common.constants import RED, YELLOW
 from tqdm import tqdm
 
@@ -36,10 +36,29 @@ def contest_bis(p1, p2, nb_fights, nb_playouts):
         players[RED] = p1_name
         players[YELLOW] = p2_name
         p1_transpositionTable = {}
-        winner = fight_bis(engines[players[RED]], engines[players[YELLOW]], nb_playouts, False, p1_transpositionTable)
+        winner = fight_bis(engines[players[RED]], engines[players[YELLOW]], nb_playouts, False, p1_transpositionTable, first_turn=i)
         scores[players[winner]] +=1
     for player in scores:
         scores[player] /= nb_fights
     return scores
     
+def contest_bis_bis(p1, p2, nb_fights, nb_playouts):
+    p1_name = p1
+    p2_name = p2
+    if p1 == p2:
+        p2_name = p2+"2"
+    engines = {p1_name: p1, p2_name: p2}
+    scores = {p1_name: 0, p2_name:0, "tie":0}
+    players = {0: "tie"}
+    for i in tqdm(range(nb_fights)):
+        # P1 is always RED, with its specific transposition table
+        players[RED] = p1_name
+        players[YELLOW] = p2_name
+        p1_transpositionTable = {}
+        p2_transpositionTable = {}
+        winner = fight_bis_bis(engines[players[RED]], engines[players[YELLOW]], nb_playouts, False, p1_transpositionTable, p2_transpositionTable, first_turn=i)
+        scores[players[winner]] +=1
+    for player in scores:
+        scores[player] /= nb_fights
+    return scores
     
