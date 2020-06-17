@@ -3,9 +3,10 @@ import copy
 import numpy as np
 from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE
 from src.game.move import Move
-from src.intelligences.ucb import ucb
+from src.intelligences.ucb import ucb, ucb_bis
 from src.intelligences.flat_mc import flat_mc
 from src.intelligences.uct import _uct, uct_search
+from src.intelligences.rave import _RAVE, rave_search
 
 class Board():
     def __init__(self):
@@ -17,9 +18,12 @@ class Board():
         self.hash = 0
         self.transposition_table = {}
         Board.ucb = ucb
+        Board.ucb_bis = ucb_bis
         Board.flat_mc = flat_mc
         Board._uct = _uct
         Board.uct_search = uct_search
+        Board._RAVE = _RAVE
+        Board.rave_search = rave_search
         
         
     def legal_moves(self):
@@ -42,6 +46,17 @@ class Board():
                 print(self.board)
  
         return self.winner
+
+    def playout_AMAF(self, playout_moves):        
+        while(True):
+            if self.finished:
+                return self.winner
+            moves = self.legal_moves()
+            n = 0
+            if len(moves) > 1:
+                n = np.random.randint(0, len(moves))
+            self.play(moves[n])
+            playout_moves.append(moves[n])
 
     
     def play(self, move):

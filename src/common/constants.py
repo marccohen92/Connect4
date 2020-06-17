@@ -9,6 +9,7 @@ DX = 6
 DY = 7
 NUMBER_TO_WIN = 4
 MAX_LEGAL_MOVES = DY
+MAX_PLAYOUT_LEGAL_MOVES = (DX*DY+1)*2
 
 def init_hash_table():
         hash_table = np.zeros((2, DX, DY))
