@@ -3,11 +3,13 @@ import copy
 import numpy as np
 from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE
 from src.game.move import Move
-from src.intelligences.ucb import ucb, ucb_bis
+from src.intelligences.ucb import ucb
 from src.intelligences.flat_mc import flat_mc
 from src.intelligences.uct import _uct, uct_search
 from src.intelligences.rave import _RAVE, rave_search
+from src.intelligences.rave_bis import _RAVE_BIS, rave_search_bis
 from src.intelligences.grave import _GRAVE, grave_search
+from src.intelligences.grave_bis import _GRAVE_BIS, grave_search_bis
 
 
 class Board():
@@ -18,16 +20,19 @@ class Board():
         self.finished = False
         self.winner = 0
         self.hash = 0
-        self.transposition_table = {}
+        self.transposition_table = [{}, {}]
         Board.ucb = ucb
-        Board.ucb_bis = ucb_bis
         Board.flat_mc = flat_mc
         Board._uct = _uct
         Board.uct_search = uct_search
         Board._RAVE = _RAVE
         Board.rave_search = rave_search
+        Board.rave_search_bis = rave_search_bis
+        Board._RAVE_BIS = _RAVE_BIS
         Board._GRAVE = _GRAVE
         Board.grave_search = grave_search
+        Board.grave_search_bis = grave_search_bis
+        Board._GRAVE_BIS = _GRAVE_BIS
         
         
     def legal_moves(self):
@@ -161,9 +166,29 @@ class Board():
         
    
     def _update_transposition_table(self, h, nb_playouts, trys, wins):
-        if h in self.transposition_table:
-            self.transposition_table[h]["total_playouts"] += nb_playouts
+        color = self.turn
+        if h in self.transposition_table[color-1]:
+            self.transposition_table[color-1][h]["total_playouts"] += nb_playouts
             for key, value in zip(["trys_per_move", "wins_per_move"], [trys, wins]):
-                self.transposition_table[h][key] = [i+j for i,j in zip(self.transposition_table[h][key], value)]
+                self.transposition_table[color-1][h][key] = [i+j for i,j in zip(self.transposition_table[color-1][h][key], value)]
         else:        
-            self.transposition_table[h] = {"total_playouts": nb_playouts, "trys_per_move": trys, "wins_per_move": wins}
+            self.transposition_table[color-1][h] = {"total_playouts": nb_playouts, "trys_per_move": trys, "wins_per_move": wins}
+    
+    
+    def _update_transposition_table_amaf(self, h, nb_playouts, trys, wins, trys_inPlayout, wins_inPlayout):
+        color = self.turn
+        if h in self.transposition_table[color-1]:
+            self.transposition_table[color-1][h]["total_playouts"] += nb_playouts
+            for key, value in zip(
+                ["trys_per_move", "wins_per_move", "trys_inPlayout_per_move", "wins_inPlayout_per_move"], 
+                [trys, wins, trys_inPlayout, wins_inPlayout]
+            ):
+                self.transposition_table[color-1][h][key] = [i+j for i,j in zip(self.transposition_table[color-1][h][key], value)]
+        else:        
+            self.transposition_table[color-1][h] = {
+                "total_playouts": nb_playouts, 
+                "trys_per_move": trys, 
+                "wins_per_move": wins,
+                "trys_inPlayout_per_move": trys_inPlayout, 
+                "wins_inPlayout_per_move": wins_inPlayout
+            }

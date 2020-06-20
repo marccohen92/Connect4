@@ -3,12 +3,12 @@ import math
 from src.common.constants import MAX_LEGAL_MOVES
 
 def uct_search(self, n=1000):
-    #self.transposition_table = {} 
+    #self.transposition_table = [{}, {}]
     # Commentée pour conserver la même transposition_table au cours d'un fight
     for i in range(n) :
         copyBoard = copy.deepcopy(self)
         self._uct(copyBoard)
-    elt_state = self.transposition_table[self.hash]
+    elt_state = self.transposition_table[self.turn - 1][self.hash]
     moves = self.legal_moves()
     best_move = moves[0]
     best_value = elt_state["trys_per_move"][0]
@@ -26,8 +26,8 @@ def _uct(self, board):
         return board.winner
 
     running_hash = board.hash
-    if running_hash in self.transposition_table:
-        elt_state = self.transposition_table[running_hash]
+    if running_hash in self.transposition_table[color-1]:
+        elt_state = self.transposition_table[color-1][running_hash]
         best_value = float("inf")
         best_move = 0
         total_playouts = elt_state["total_playouts"]
