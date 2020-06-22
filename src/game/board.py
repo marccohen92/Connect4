@@ -7,9 +7,7 @@ from src.intelligences.ucb import ucb
 from src.intelligences.flat_mc import flat_mc
 from src.intelligences.uct import _uct, uct_search
 from src.intelligences.rave import _RAVE, rave_search
-from src.intelligences.rave_bis import _RAVE_BIS, rave_search_bis
 from src.intelligences.grave import _GRAVE, grave_search
-from src.intelligences.grave_bis import _GRAVE_BIS, grave_search_bis
 
 
 class Board():
@@ -27,12 +25,8 @@ class Board():
         Board.uct_search = uct_search
         Board._RAVE = _RAVE
         Board.rave_search = rave_search
-        Board.rave_search_bis = rave_search_bis
-        Board._RAVE_BIS = _RAVE_BIS
         Board._GRAVE = _GRAVE
         Board.grave_search = grave_search
-        Board.grave_search_bis = grave_search_bis
-        Board._GRAVE_BIS = _GRAVE_BIS
         
         
     def legal_moves(self):
@@ -55,17 +49,6 @@ class Board():
                 print(self.board)
  
         return self.winner
-
-    def playout_AMAF(self, playout_moves):        
-        while(True):
-            if self.finished:
-                return self.winner
-            moves = self.legal_moves()
-            n = 0
-            if len(moves) > 1:
-                n = np.random.randint(0, len(moves))
-            self.play(moves[n])
-            playout_moves.append(moves[n])
 
     
     def play(self, move):
