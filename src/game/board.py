@@ -18,7 +18,7 @@ class Board():
         self.finished = False
         self.winner = 0
         self.hash = 0
-        self.transposition_table = [{}, {}]
+        #self.transposition_table = [{}, {}]
         Board.ucb = ucb
         Board.flat_mc = flat_mc
         Board._uct = _uct
