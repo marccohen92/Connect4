@@ -1,4 +1,4 @@
-from src.common.constants import DY, RED
+from src.common.constants import DX, DY, RED
 
 
 class Move():
@@ -18,12 +18,12 @@ class Move():
         else:
             return False
         
-    # On veut coder (comme un hash) chacun des 5*5*3 coups possibles * 2 couleurs
-    def code_AMAF(self):
-        # Encode 2 colors * DY columns possible moves
+    def code_AMAF(self, tokens_level):
         if self.color == RED :
+            #code = self.column + tokens_level[self.column] * DY 
             code = self.column
         else : 
-            code = (self.column + 1) * (DY + 1)
+            #code = self.column + tokens_level[self.column] * DY + (DY + DX * DY)
+            code = self.column + DY
         return code
         

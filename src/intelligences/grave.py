@@ -2,11 +2,16 @@ import copy
 import math
 from src.common.constants import RED,MAX_LEGAL_MOVES, MAX_PLAYOUT_LEGAL_MOVES
 
-def rave_search(self, n=1000):
+
+def grave_search(self, n=1000, threshold=50):
     #self.transposition_table[self.turn] = {}
     for i in range(n):
         b1 = copy.deepcopy(self)
-        res = self._RAVE(b1, [])
+        if b1.hash in b1.transposition_table[self.turn - 1]:
+            elt_ref = b1.transposition_table[self.turn - 1][b1.hash]
+        else:
+            elt_ref=None
+        res = self._GRAVE(b1, [], elt_ref, threshold)
     elt_state = self.transposition_table[self.turn - 1][self.hash]
     moves = self.legal_moves()
     best_move = moves[0]
@@ -18,7 +23,7 @@ def rave_search(self, n=1000):
     return best_move
 
 
-def _RAVE(self, board, played):
+def _GRAVE(self, board, played, elt_ref, threshold=50):
     color = board.turn
     moves = board.legal_moves()
     tokens_level = board.tokens_level
@@ -27,16 +32,19 @@ def _RAVE(self, board, played):
     running_hash = board.hash
     if running_hash in self.transposition_table[color - 1]:
         elt_state = self.transposition_table[color - 1][running_hash]
+        elt_r = elt_ref
+        total_playouts = elt_state["total_playouts"]
+        if total_playouts > threshold:
+            elt_r = elt_state
         best_value = float("-inf")
         best_move = 0
-        total_playouts = elt_state["total_playouts"]
         for m in range(0, len(moves)): 
             value = float("inf")
             code = moves[m].code_AMAF(tokens_level)
             trys = elt_state["trys_per_move"][m]
             wins = elt_state["wins_per_move"][m]
-            amaf_visits = elt_state["trys_inPlayout_per_move"][code]
-            amaf_scores = elt_state["wins_inPlayout_per_move"][code]
+            amaf_visits = elt_r["trys_inPlayout_per_move"][code]
+            amaf_scores = elt_r["wins_inPlayout_per_move"][code]
             if amaf_visits > 0:
                 beta = amaf_visits / (trys + amaf_visits + 1e-5 * trys * amaf_visits)
                 Q = 1
@@ -55,7 +63,7 @@ def _RAVE(self, board, played):
 
 
         board.play(moves[best_move])
-        res = self._RAVE(board, played)
+        res = self._GRAVE(board, played, elt_r, threshold)
         trys = [0.0 if i != best_move else 1 for i in range(MAX_LEGAL_MOVES)]
         won = 1 if RED == res else 0
         wins = [0.0 if i != best_move else won for i in range(MAX_LEGAL_MOVES)]

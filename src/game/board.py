@@ -1,12 +1,14 @@
 import random
 import copy
 import numpy as np
-from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE
+from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE, HASH_CONSTANT
 from src.game.move import Move
-from src.intelligences.ucb import ucb, ucb_bis
+from src.intelligences.ucb import ucb
 from src.intelligences.flat_mc import flat_mc
 from src.intelligences.uct import _uct, uct_search
 from src.intelligences.rave import _RAVE, rave_search
+from src.intelligences.grave import _GRAVE, grave_search
+
 
 class Board():
     def __init__(self):
@@ -16,14 +18,14 @@ class Board():
         self.finished = False
         self.winner = 0
         self.hash = 0
-        self.transposition_table = {}
         Board.ucb = ucb
-        Board.ucb_bis = ucb_bis
         Board.flat_mc = flat_mc
         Board._uct = _uct
         Board.uct_search = uct_search
         Board._RAVE = _RAVE
         Board.rave_search = rave_search
+        Board._GRAVE = _GRAVE
+        Board.grave_search = grave_search
         
         
     def legal_moves(self):
@@ -46,17 +48,6 @@ class Board():
                 print(self.board)
  
         return self.winner
-
-    def playout_AMAF(self, playout_moves):        
-        while(True):
-            if self.finished:
-                return self.winner
-            moves = self.legal_moves()
-            n = 0
-            if len(moves) > 1:
-                n = np.random.randint(0, len(moves))
-            self.play(moves[n])
-            playout_moves.append(moves[n])
 
     
     def play(self, move):
@@ -153,13 +144,23 @@ class Board():
     
     
     def _update_hash(self, color, column, row):
-        self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column])
-        
-   
-    def _update_transposition_table(self, h, nb_playouts, trys, wins):
-        if h in self.transposition_table:
-            self.transposition_table[h]["total_playouts"] += nb_playouts
-            for key, value in zip(["trys_per_move", "wins_per_move"], [trys, wins]):
-                self.transposition_table[h][key] = [i+j for i,j in zip(self.transposition_table[h][key], value)]
+        self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column]) ^ HASH_CONSTANT
+      
+    
+    def _update_transposition_table_amaf(self, h, nb_playouts, trys, wins, trys_inPlayout, wins_inPlayout):
+        color = self.turn
+        if h in self.transposition_table[color-1]:
+            self.transposition_table[color-1][h]["total_playouts"] += nb_playouts
+            for key, value in zip(
+                ["trys_per_move", "wins_per_move", "trys_inPlayout_per_move", "wins_inPlayout_per_move"], 
+                [trys, wins, trys_inPlayout, wins_inPlayout]
+            ):
+                self.transposition_table[color-1][h][key] = [i+j for i,j in zip(self.transposition_table[color-1][h][key], value)]
         else:        
-            self.transposition_table[h] = {"total_playouts": nb_playouts, "trys_per_move": trys, "wins_per_move": wins}
+            self.transposition_table[color-1][h] = {
+                "total_playouts": nb_playouts, 
+                "trys_per_move": trys, 
+                "wins_per_move": wins,
+                "trys_inPlayout_per_move": trys_inPlayout, 
+                "wins_inPlayout_per_move": wins_inPlayout
+            }
