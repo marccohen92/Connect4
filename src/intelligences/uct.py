@@ -2,7 +2,16 @@ import copy
 import math
 from src.common.constants import MAX_LEGAL_MOVES
 
-def uct_search(self, n=1000):
+def update_transposition_table(transpositionT, h, nb_playouts, trys, wins):
+    if h in transpositionT:
+        transpositionT[h]["total_playouts"] += nb_playouts
+        for key, value in zip(["trys_per_move", "wins_per_move"], [trys, wins]):
+            transpositionT[h][key] = [i+j for i,j in zip(transpositionT[h][key], value)]
+    else:
+        transpositionT[h] = {"total_playouts": nb_playouts, "trys_per_move": trys, "wins_per_move": wins}
+
+
+def uct_search(self, n, transpositionT):
     #self.transposition_table = [{}, {}]
     # Commentée pour conserver la même transposition_table au cours d'un fight
     
@@ -17,9 +26,9 @@ def uct_search(self, n=1000):
         #print("========== ", i)
         #print()
         copyBoard = copy.deepcopy(self)
-        self._uct(copyBoard)
+        self._uct(copyBoard, transpositionT)
         
-    elt_state = self.transposition_table[self.turn - 1][self.hash]
+    elt_state = transpositionT[self.hash]
     #print("Stats for state ", self.hash, ": ", elt_state)
     
     moves = self.legal_moves()
@@ -35,7 +44,7 @@ def uct_search(self, n=1000):
     return best_move
 
 
-def _uct(self, board):
+def _uct(self, board, transpositionT):
     #print("=== _UCT CALL")
     #print("State: ", board.hash)
     color = board.turn
@@ -54,9 +63,9 @@ def _uct(self, board):
     running_hash = board.hash
     #print("Board current hash: ", running_hash)
     
-    if running_hash in self.transposition_table[self.turn-1]:
+    if running_hash in transpositionT:
         #print(" -> Known state")
-        elt_state = self.transposition_table[self.turn-1][running_hash]
+        elt_state = transpositionT[running_hash]
         #print("State stats: ", elt_state)
         best_value = float("inf")
         best_move = 0
@@ -84,14 +93,14 @@ def _uct(self, board):
             b_simulation.play(moves[best_move])
             
             #print("=== Start recursive call...")
-            res = self._uct(b_simulation)
+            res = self._uct(b_simulation, transpositionT)
             #print("=== ... End recursive call, result was ", res)
             
             won = 1 if res == color else 0
             wins = [0.0 if i != best_move else won for i in range(MAX_LEGAL_MOVES)]
             
             
-            self._update_transposition_table(running_hash, 1, trys, wins)
+            update_transposition_table(transpositionT, running_hash, 1, trys, wins)
             #print("Updated transposition table for hash ", running_hash)
             #print(self.transposition_table[self.turn-1][running_hash])
 
@@ -100,7 +109,7 @@ def _uct(self, board):
         #print(" -> Unknown state")
         trys = [0.0 for i in range(MAX_LEGAL_MOVES)]
         wins = [0.0 for i in range(MAX_LEGAL_MOVES)]
-        self._update_transposition_table(running_hash, 1, trys, wins) 
+        update_transposition_table(transpositionT, running_hash, 1, trys, wins) 
         #print("Updated transposition table for hash ", running_hash)
         #print(self.transposition_table[self.turn-1][running_hash])
         res = board.playout()
