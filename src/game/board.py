@@ -18,7 +18,6 @@ class Board():
         self.finished = False
         self.winner = 0
         self.hash = 0
-        #self.transposition_table = [{}, {}]
         Board.ucb = ucb
         Board.flat_mc = flat_mc
         Board._uct = _uct
@@ -146,17 +145,7 @@ class Board():
     
     def _update_hash(self, color, column, row):
         self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column]) ^ HASH_CONSTANT
-        
-   
-    def _update_transposition_table(self, h, nb_playouts, trys, wins):
-        color = self.turn
-        if h in self.transposition_table[color-1]:
-            self.transposition_table[color-1][h]["total_playouts"] += nb_playouts
-            for key, value in zip(["trys_per_move", "wins_per_move"], [trys, wins]):
-                self.transposition_table[color-1][h][key] = [i+j for i,j in zip(self.transposition_table[color-1][h][key], value)]
-        else:        
-            self.transposition_table[color-1][h] = {"total_playouts": nb_playouts, "trys_per_move": trys, "wins_per_move": wins}
-    
+      
     
     def _update_transposition_table_amaf(self, h, nb_playouts, trys, wins, trys_inPlayout, wins_inPlayout):
         color = self.turn

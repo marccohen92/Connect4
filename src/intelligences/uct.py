@@ -88,12 +88,11 @@ def _uct(self, board, transpositionT):
         if (len(moves) > 0):
             
             trys = [0.0 if i != best_move else 1 for i in range(MAX_LEGAL_MOVES)]
-
-            b_simulation = copy.deepcopy(board)
-            b_simulation.play(moves[best_move])
+            
+            board.play(moves[best_move])
             
             #print("=== Start recursive call...")
-            res = self._uct(b_simulation, transpositionT)
+            res = self._uct(board, transpositionT)
             #print("=== ... End recursive call, result was ", res)
             
             won = 1 if res == color else 0
