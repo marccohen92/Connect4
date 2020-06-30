@@ -145,7 +145,7 @@ class Board():
     
     
     def _update_hash(self, color, column, row):
-        self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column]) #^ HASH_CONSTANT[int(self.turn)-1]
+        self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column]) ^ HASH_CONSTANT
         
    
     def _update_transposition_table(self, h, nb_playouts, trys, wins):

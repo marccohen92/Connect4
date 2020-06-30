@@ -10,7 +10,7 @@ DY = 7
 NUMBER_TO_WIN = 4
 
 #HASH_CONSTANT = [int(random.uniform(0, 2**64)) for i in range(2)]
-#HASH_CONSTANT = int(random.uniform(0, 2**64))
+HASH_CONSTANT = int(random.uniform(0, 2**64))
 
 MAX_LEGAL_MOVES = DY * 2
 MAX_PLAYOUT_LEGAL_MOVES = 2*DY #(DY + DX * DY) * 2 
@@ -25,6 +25,3 @@ def init_hash_table():
     return hash_table
 
 HASH_TABLE = init_hash_table()
-
-
-
