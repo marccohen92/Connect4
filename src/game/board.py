@@ -1,7 +1,7 @@
 import random
 import copy
 import numpy as np
-from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE
+from src.common.constants import EMPTY, RED, YELLOW, DX, DY, NUMBER_TO_WIN, HASH_TABLE, HASH_CONSTANT
 from src.game.move import Move
 from src.intelligences.ucb import ucb
 from src.intelligences.flat_mc import flat_mc
@@ -145,7 +145,7 @@ class Board():
     
     
     def _update_hash(self, color, column, row):
-        self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column])
+        self.hash = int(self.hash) ^ int(HASH_TABLE[color-1][row][column]) #^ HASH_CONSTANT[int(self.turn)-1]
         
    
     def _update_transposition_table(self, h, nb_playouts, trys, wins):

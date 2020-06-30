@@ -21,6 +21,7 @@ def rave_search(self, n=1000):
 def _RAVE(self, board, played):
     color = board.turn
     moves = board.legal_moves()
+    tokens_level = board.tokens_level
     if board.finished:
         return board.winner
     running_hash = board.hash
@@ -31,7 +32,7 @@ def _RAVE(self, board, played):
         total_playouts = elt_state["total_playouts"]
         for m in range(0, len(moves)): 
             value = float("inf")
-            code = moves[m].code_AMAF()
+            code = moves[m].code_AMAF(tokens_level)
             trys = elt_state["trys_per_move"][m]
             wins = elt_state["wins_per_move"][m]
             amaf_visits = elt_state["trys_inPlayout_per_move"][code]
@@ -58,13 +59,13 @@ def _RAVE(self, board, played):
         trys = [0.0 if i != best_move else 1 for i in range(MAX_LEGAL_MOVES)]
         won = 1 if RED == res else 0
         wins = [0.0 if i != best_move else won for i in range(MAX_LEGAL_MOVES)]
-        amaf_visits = [0.0 if k!=moves[best_move].code_AMAF() else 1 for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
-        amaf_scores = [0.0 if k!=moves[best_move].code_AMAF() else won for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
+        amaf_visits = [0.0 if k!=moves[best_move].code_AMAF(tokens_level) else 1 for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
+        amaf_scores = [0.0 if k!=moves[best_move].code_AMAF(tokens_level) else won for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
         for i in range(len(played)):
-            code = played[i].code_AMAF()
+            code = played[i].code_AMAF(tokens_level)
             seen = False
             for j in range(i):
-                if played[j].code_AMAF()==code:
+                if played[j].code_AMAF(tokens_level)==code:
                     seen = True
             if not seen:
                 amaf_visits = [el if k != code else 1 for k, el in enumerate(amaf_visits)]

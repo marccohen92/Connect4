@@ -53,11 +53,11 @@ def _uct(self, board):
             wins = [0.0 if i != best_move else won for i in range(MAX_LEGAL_MOVES)]
             self._update_transposition_table(running_hash, 1, trys, wins)
 
-            return res
+        return res
     else:
         trys = [0.0 for i in range(MAX_LEGAL_MOVES)]
         wins = [0.0 for i in range(MAX_LEGAL_MOVES)]
-        self._update_transposition_table(running_hash, 1, trys, wins) # A VOIR SI 0 ou 1!
+        self._update_transposition_table(running_hash, 1, trys, wins) 
 
         res = board.playout()
 
