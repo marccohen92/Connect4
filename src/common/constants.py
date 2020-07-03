@@ -12,7 +12,7 @@ NUMBER_TO_WIN = 4
 HASH_CONSTANT = int(random.uniform(0, 2**64))
 
 MAX_LEGAL_MOVES = DY * 2
-MAX_PLAYOUT_LEGAL_MOVES = 2*DY #(DY + DX * DY) * 2 
+MAX_PLAYOUT_LEGAL_MOVES = (DY + DX * DY) * 2 #2*DY 
 
 def init_hash_table():
     random.seed(0)

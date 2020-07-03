@@ -41,7 +41,8 @@ class Board():
             possible_moves = self.legal_moves()
             move = random.choice(possible_moves)
             if played is not None:
-                played.append(move)
+                #played.append(move.code_AMAF(self.tokens_level))
+                played.insert(0,move.code_AMAF(self.tokens_level))
             self.play(move)
             if verbose:
                 print("-------------")
