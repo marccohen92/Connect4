@@ -21,9 +21,7 @@ class Move():
     def code_AMAF(self, tokens_level): 
         if self.color == RED :
             code = self.column + tokens_level[self.column] * DY 
-            #code = self.column
         else : 
             code = self.column + tokens_level[self.column] * DY + (DY + DX * DY)
-            #code = self.column + DY
         return code
         

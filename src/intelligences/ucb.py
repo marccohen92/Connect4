@@ -1,7 +1,7 @@
 import copy
 import math
 
-def ucb(self, n=100):
+def ucb(self, n=1000):
     moves = self.legal_moves()
     sumScores = [0 for x in range (len(moves))]
     nbVisits = [0 for x in range (len(moves))]

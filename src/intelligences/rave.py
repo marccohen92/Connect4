@@ -21,7 +21,6 @@ def update_transposition_table_amaf(transpositionT, h, nb_playouts, trys, wins, 
         }
 
 def rave_search(self, n, transpositionT):
-    #self.transposition_table[self.turn] = {}
     for i in range(n):
         b1 = copy.deepcopy(self)
         res = self._RAVE(b1, [], transpositionT)
@@ -83,7 +82,7 @@ def _RAVE(self, board, played, transpositionT):
             code = played[i]
             seen = False
             for j in range(i):
-                if played[j]==code:
+                if played[j] == code:
                     seen = True
             if not seen:
                 amaf_visits = [el if k != code else 1 for k, el in enumerate(amaf_visits)]

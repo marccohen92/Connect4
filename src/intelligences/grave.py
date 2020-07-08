@@ -1,18 +1,18 @@
 import copy
 import math
 from src.common.constants import RED,MAX_LEGAL_MOVES, MAX_PLAYOUT_LEGAL_MOVES
+from src.intelligences.rave import update_transposition_table_amaf
 
 
-def grave_search(self, n=1000, threshold=50):
-    #self.transposition_table[self.turn] = {}
+def grave_search(self, n, transpositionT, threshold=50):
     for i in range(n):
         b1 = copy.deepcopy(self)
-        if b1.hash in b1.transposition_table[self.turn - 1]:
-            elt_ref = b1.transposition_table[self.turn - 1][b1.hash]
+        if b1.hash in transpositionT:
+            elt_ref = transpositionT[b1.hash]
         else:
             elt_ref=None
-        res = self._GRAVE(b1, [], elt_ref, threshold)
-    elt_state = self.transposition_table[self.turn - 1][self.hash]
+        res = self._GRAVE(b1, [], elt_ref, transpositionT, threshold)
+    elt_state = transpositionT[self.hash]
     moves = self.legal_moves()
     best_move = moves[0]
     best_value = elt_state["trys_per_move"][0]
@@ -23,15 +23,15 @@ def grave_search(self, n=1000, threshold=50):
     return best_move
 
 
-def _GRAVE(self, board, played, elt_ref, threshold=50):
+def _GRAVE(self, board, played, elt_ref, transpositionT, threshold=50):
     color = board.turn
     moves = board.legal_moves()
     tokens_level = board.tokens_level
     if board.finished:
         return board.winner
     running_hash = board.hash
-    if running_hash in self.transposition_table[color - 1]:
-        elt_state = self.transposition_table[color - 1][running_hash]
+    if running_hash in transpositionT:
+        elt_state = transpositionT[running_hash]
         elt_r = elt_ref
         total_playouts = elt_state["total_playouts"]
         if total_playouts > threshold:
@@ -62,24 +62,25 @@ def _GRAVE(self, board, played, elt_ref, threshold=50):
                 best_move = m
 
 
+        best_move_code = moves[best_move].code_AMAF(tokens_level)
         board.play(moves[best_move])
-        res = self._GRAVE(board, played, elt_r, threshold)
+        res = self._GRAVE(board, played, elt_r, transpositionT, threshold)
         trys = [0.0 if i != best_move else 1 for i in range(MAX_LEGAL_MOVES)]
         won = 1 if RED == res else 0
         wins = [0.0 if i != best_move else won for i in range(MAX_LEGAL_MOVES)]
-        amaf_visits = [0.0 if k!=moves[best_move].code_AMAF(tokens_level) else 1 for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
-        amaf_scores = [0.0 if k!=moves[best_move].code_AMAF(tokens_level) else won for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
+        amaf_visits = [0.0 if k!=best_move_code else 1 for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
+        amaf_scores = [0.0 if k!=best_move_code else won for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
         for i in range(len(played)):
-            code = played[i].code_AMAF(tokens_level)
+            code = played[i]
             seen = False
             for j in range(i):
-                if played[j].code_AMAF(tokens_level)==code:
+                if played[j] == code:
                     seen = True
             if not seen:
                 amaf_visits = [el if k != code else 1 for k, el in enumerate(amaf_visits)]
                 amaf_scores = [el if k != code else won for k, el in enumerate(amaf_scores)]
 
-        self._update_transposition_table_amaf(running_hash, 1, trys, wins, amaf_visits, amaf_scores)
+        update_transposition_table_amaf(transpositionT, running_hash, 1, trys, wins, amaf_visits, amaf_scores)
         played.insert(0, moves[best_move])
         return res
     else:
@@ -87,7 +88,7 @@ def _GRAVE(self, board, played, elt_ref, threshold=50):
         wins = [0.0 for i in range(MAX_LEGAL_MOVES)]
         amaf_visits = [0.0 for i in range(MAX_PLAYOUT_LEGAL_MOVES)]
         amaf_scores = [0.0 for i in range(MAX_PLAYOUT_LEGAL_MOVES)]
-        self._update_transposition_table_amaf(running_hash, 1, trys, wins, amaf_visits, amaf_scores)
+        update_transposition_table_amaf(transpositionT, running_hash, 1, trys, wins, amaf_visits, amaf_scores)
 
         res = board.playout(played=played)
 
