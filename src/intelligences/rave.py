@@ -2,12 +2,29 @@ import copy
 import math
 from src.common.constants import RED,MAX_LEGAL_MOVES, MAX_PLAYOUT_LEGAL_MOVES
 
-def rave_search(self, n=1000):
-    #self.transposition_table[self.turn] = {}
+
+def update_transposition_table_amaf(transpositionT, h, nb_playouts, trys, wins, trys_inPlayout, wins_inPlayout):
+    if h in transpositionT:
+        transpositionT[h]["total_playouts"] += nb_playouts
+        for key, value in zip(
+            ["trys_per_move", "wins_per_move", "trys_inPlayout_per_move", "wins_inPlayout_per_move"], 
+            [trys, wins, trys_inPlayout, wins_inPlayout]
+        ):
+            transpositionT[h][key] = [i+j for i,j in zip(transpositionT[h][key], value)]
+    else:        
+        transpositionT[h] = {
+            "total_playouts": nb_playouts, 
+            "trys_per_move": trys, 
+            "wins_per_move": wins,
+            "trys_inPlayout_per_move": trys_inPlayout, 
+            "wins_inPlayout_per_move": wins_inPlayout
+        }
+
+def rave_search(self, n, transpositionT):
     for i in range(n):
         b1 = copy.deepcopy(self)
-        res = self._RAVE(b1, [])
-    elt_state = self.transposition_table[self.turn - 1][self.hash]
+        res = self._RAVE(b1, [], transpositionT)
+    elt_state = transpositionT[self.hash]
     moves = self.legal_moves()
     best_move = moves[0]
     best_value = elt_state["trys_per_move"][0]
@@ -18,15 +35,15 @@ def rave_search(self, n=1000):
     return best_move
 
 
-def _RAVE(self, board, played):
+def _RAVE(self, board, played, transpositionT):
     color = board.turn
     moves = board.legal_moves()
     tokens_level = board.tokens_level
     if board.finished:
         return board.winner
     running_hash = board.hash
-    if running_hash in self.transposition_table[color - 1]:
-        elt_state = self.transposition_table[color - 1][running_hash]
+    if running_hash in transpositionT:
+        elt_state = transpositionT[running_hash]
         best_value = float("-inf")
         best_move = 0
         total_playouts = elt_state["total_playouts"]
@@ -52,34 +69,34 @@ def _RAVE(self, board, played):
             if value > best_value:
                 best_value = value
                 best_move = m
-
-
+                
+        best_move_code = moves[best_move].code_AMAF(tokens_level)
         board.play(moves[best_move])
-        res = self._RAVE(board, played)
+        res = self._RAVE(board, played, transpositionT)
         trys = [0.0 if i != best_move else 1 for i in range(MAX_LEGAL_MOVES)]
         won = 1 if RED == res else 0
         wins = [0.0 if i != best_move else won for i in range(MAX_LEGAL_MOVES)]
-        amaf_visits = [0.0 if k!=moves[best_move].code_AMAF(tokens_level) else 1 for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
-        amaf_scores = [0.0 if k!=moves[best_move].code_AMAF(tokens_level) else won for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
+        amaf_visits = [0.0 if k!=best_move_code else 1 for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
+        amaf_scores = [0.0 if k!=best_move_code else won for k in range(MAX_PLAYOUT_LEGAL_MOVES)]
         for i in range(len(played)):
-            code = played[i].code_AMAF(tokens_level)
+            code = played[i]
             seen = False
             for j in range(i):
-                if played[j].code_AMAF(tokens_level)==code:
+                if played[j] == code:
                     seen = True
             if not seen:
                 amaf_visits = [el if k != code else 1 for k, el in enumerate(amaf_visits)]
                 amaf_scores = [el if k != code else won for k, el in enumerate(amaf_scores)]
 
-        self._update_transposition_table_amaf(running_hash, 1, trys, wins, amaf_visits, amaf_scores)
-        played.insert(0, moves[best_move])
+        update_transposition_table_amaf(transpositionT, running_hash, 1, trys, wins, amaf_visits, amaf_scores)
+        played.insert(0, best_move_code)
         return res
     else:
         trys = [0.0 for i in range(MAX_LEGAL_MOVES)]
         wins = [0.0 for i in range(MAX_LEGAL_MOVES)]
         amaf_visits = [0.0 for i in range(MAX_PLAYOUT_LEGAL_MOVES)]
         amaf_scores = [0.0 for i in range(MAX_PLAYOUT_LEGAL_MOVES)]
-        self._update_transposition_table_amaf(running_hash, 1, trys, wins, amaf_visits, amaf_scores)
+        update_transposition_table_amaf(transpositionT, running_hash, 1, trys, wins, amaf_visits, amaf_scores)
 
         res = board.playout(played=played)
 

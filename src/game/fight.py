@@ -27,5 +27,5 @@ def fight(p1, p1_table, p2, p2_table, nb_playouts=1000, verbose=True):
         board.play(move)
     if verbose:
         print(board.board)
-        print("Winner :" + int(board.winner))
+        print("Winner :" + str(board.winner))
     return board.winner
